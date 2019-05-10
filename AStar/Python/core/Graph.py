@@ -7,9 +7,7 @@ class Node(object):
         self.parent = None
         self.gScore, self.fScore = float('Inf'), float('Inf')
         self.disToParent = None
-
-    def set_to_node_of(self, linkID):
-        self.toNodeOf = linkID
+        self.speedFromParent = None
 
     def show_info(self):
         return 'Node ID:{}, coor:({}, {}), parent:{}'.format(self.ID, self.lon, self.lat, self.parent)
@@ -32,15 +30,20 @@ class Graph(object):
 
     def init_link_node_relation(self):
         """
-        linkNodeRelation:{"fromNodeID_toNodeID":link1ID,
-                          "fromNodeID_toNodeID":link2ID,
-                          "fromNodeID_toNodeID":link3ID,
+        linkNodeRelation:{"fromNodeID_toNodeID":{"linkID":xx,"speed":xx},
+                          "fromNodeID_toNodeID":{"linkID":xx,"speed":xx},
+                          "fromNodeID_toNodeID":{"linkID":xx,"speed":xx},
                           ....}
         """
         for link in self.links.values.tolist():
-            linkID, fromNodeID, toNodeID = link[0], str(link[3]), str(link[4])
-            key = fromNodeID + '_' + toNodeID
-            self.linkNodeRelation[key] = linkID
+            linkID, direction, fromNodeID, toNodeID = str(link[0]), link[2], str(link[3]), str(link[4])
+            speedFromTo, speedToFrom = link[-4], link[-3]
+            key1 = fromNodeID + '_' + toNodeID
+            self.linkNodeRelation[key1] = {'linkID':linkID, 'speed':speedFromTo}
+            if direction == 0:
+                key2 = toNodeID + '_' + fromNodeID
+                self.linkNodeRelation[key2] = {'linkID':linkID, 'speed':speedToFrom}
+
 
     def init_network(self):
         """
@@ -49,7 +52,7 @@ class Graph(object):
                         ...}
         """
         for link in self.links.values.tolist():
-            linkID, linkLength, fromNodeID, toNodeID, geometry = str(link[0]), link[1],str(link[3]), str(link[4]), str(link[-1])
+            linkID, linkLength, direction, fromNodeID, toNodeID, geometry = str(link[0]), link[1], link[2], str(link[3]), str(link[4]), str(link[-1])
             # parse from node's and to node's coors
             openBracket, closeBracket = geometry.index('('), geometry.index(')')
             points = geometry[openBracket+1:closeBracket-1].split(', ')
@@ -58,12 +61,18 @@ class Graph(object):
             toNodeLon, toNodeLat = toNodeCor[0], toNodeCor[1]
             # init from node and to node instance
             fromNode, toNode = Node(fromNodeID, fromNodeLon, fromNodeLat), Node(toNodeID, toNodeLon, toNodeLat)
-            # link is directed, only from fromNode can go to toNode, so neighbour adding is one-way
             try:
                 self.network[fromNode.ID]["neighbours"].append((toNode, linkLength))
+                if direction == 0:
+                    self.network[toNode.ID]["neighbours"].append((fromNode, linkLength))
             except KeyError:
                 self.network[fromNode.ID] = {"node":fromNode, 
                                              "neighbours":[(toNode, linkLength)]}
+                if direction == 0:
+                    self.network[toNode.ID] = {"node":toNode, 
+                                               "neighbours":[(fromNode, linkLength)]}
+
+
 
 if __name__ == '__main__':
     g = Graph('E:\java_projects\linkmatch\sz_shp_mars\link', 'gbk')

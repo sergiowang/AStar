@@ -3,9 +3,9 @@ from Astar import Astar
 import pickle
 
 
-g = Graph('E:\java_projects\linkmatch\sz_shp_mars\link', 'gbk')
-with open('graph.pickle', 'wb') as f:
-    pickle.dump(g, f)
+# g = Graph('E:\java_projects\linkmatch\sz_shp_mars\link', 'gbk')
+# with open('graph.pickle', 'wb') as f:
+#     pickle.dump(g, f)
 
 
 

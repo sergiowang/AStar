@@ -76,20 +76,25 @@ class Astar(object):
 
     def trace_back(self, PrevNode):
         print('Trace back path...')
-        pathNode = [PrevNode.ID]
-        lastLinkID = self.graph.linkNodeRelation[PrevNode.parent.ID + '_' + PrevNode.ID]
-        pathLink = [lastLinkID]
+        pathNode = [int(PrevNode.ID)]
+        nodePair = PrevNode.parent.ID + '_' + PrevNode.ID
+        LinkID, nodePairSpeed = self.graph.linkNodeRelation[nodePair].values()
+        pathLink = [int(LinkID)]
+        pathSpeed = [nodePairSpeed]
         pathDis = [PrevNode.disToParent]
         while PrevNode.parent:
             PrevNode = PrevNode.parent
-            pathNode.append(PrevNode.ID)
+            pathNode.append(int(PrevNode.ID))
             if PrevNode.parent is not None:
-                linkID = self.graph.linkNodeRelation[PrevNode.parent.ID + '_' + PrevNode.ID]
-                pathLink.append(linkID)
+                nodePair = PrevNode.parent.ID + '_' + PrevNode.ID
+                linkID, nodePairSpeed = self.graph.linkNodeRelation[nodePair].values()
+                pathSpeed.append(nodePairSpeed)
+                pathLink.append(int(linkID))
                 pathDis.append(PrevNode.disToParent)
         print('Trace done!')
         return {'pathNode':list(reversed(pathNode)), 
                 'pathLink':list(reversed(pathLink)), 
-                'pathDis':list(reversed(pathDis))}
+                'pathDis':list(reversed(pathDis)), 
+                'pathSpeed':list(reversed(pathSpeed))}
 
 
